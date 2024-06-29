@@ -30,13 +30,7 @@ runs:
       run: |
         mkdir -p $HOME/scripts
         wget -O $HOME/scripts/get_latest_blender.py https://raw.githubusercontent.com/dshot92/build-blender-extension/main/get_latest_blender.py
-        python $HOME/scripts/get_latest_blender.py
-      env:
-        HOME: ${{ github.workspace }}
-
-    - name: Set BLENDER_URL environment variable
-      shell: bash
-      run: echo "BLENDER_URL=${{ steps.get_blender_url.outputs.stdout }}" >> $GITHUB_ENV
+        echo "BLENDER_URL=$( python $HOME/scripts/get_latest_blender.py)" >> $GITHUB_ENV
 
     - name: Download and extract Blender
       shell: bash
