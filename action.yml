@@ -28,12 +28,15 @@ runs:
 
     - name: Get latest daily Blender build URL
       shell: bash
-      run: python get_latest_blender.py > blender_url.txt
+      run: |
+        blender_url=$(python get_latest_blender.py)
+        echo "BLENDER_URL=$blender_url" >> $GITHUB_ENV
+        echo $blender_url > blender_url.txt  # Optionally, save to a file for reference
 
     - name: Download and extract Blender
       shell: bash
       run: |
-        wget -O /home/runner/blender.tar.xz $(cat blender_url.txt)
+        wget -O /home/runner/blender.tar.xz ${{ env.BLENDER_URL }}
         mkdir -p /home/runner/.local/bin /home/runner/blender
         tar -xf /home/runner/blender.tar.xz -C /home/runner/blender --strip-components=1
         ln -s /home/runner/blender/blender /home/runner/.local/bin/blender
