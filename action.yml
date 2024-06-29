@@ -45,7 +45,7 @@ runs:
       id: extract_version
       run: |
         echo "EXT_VERSION=$(python -c "import toml; print(toml.load('./blender_manifest.toml')['version'])")" >> $GITHUB_ENV
-        echo "ZIP_FILE_PATH=/home/runner/${{ github.event.repository.name }}-${{ EXT_VERSION }}.zip" >> $GITHUB_ENV  # Store zip file path in environment variable
+        echo "ZIP_FILE_PATH=/home/runner/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}.zip" >> $GITHUB_ENV  # Store zip file path in environment variable
 
     - name: Build extension and capture zip filename
       shell: bash
