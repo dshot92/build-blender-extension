@@ -1,13 +1,13 @@
-name: 'Build Blender Extension'
-description: 'Action to automatically build the Blender Extension and store the resulting .zip artifact.'
-author: 'DShot92, Daniele Stochino'
+name: Build Blender Extension
+description: Action to automatically build the Blender Extension and store the resulting .zip artifact.
+author: DShot92, Daniele Stochino
 
 branding:
-  icon: 'box'
-  color: 'blue'
+  icon: box
+  color: blue
 
 runs:
-  using: 'composite'
+  using: composite
 
   steps:
     - name: Checkout repository
@@ -20,62 +20,61 @@ runs:
 
     - name: Install required Python packages
       shell: bash
-      run: pip install requests toml-cli toml beautifulsoup4
-
-    - name: List files in directory
-      shell: bash
-      run: ls -R
+      run: |
+        python -m pip install --upgrade pip
+        pip install requests toml-cli toml beautifulsoup4
 
     - name: Get latest daily Blender build URL
+      shell: bash
       run: |
-        blender_url=$(python - <<'EOF'
-import re
-from urllib import request
-from bs4 import BeautifulSoup
+        blender_url=$(python3 - <<'EOF'
+        import re
+        from urllib import request
+        from bs4 import BeautifulSoup
 
-def get_latest_daily_build_url():
-    try:
-        resp = request.urlopen("https://builder.blender.org/download/daily/")
-        soup = BeautifulSoup(resp, 'html.parser')
+        def get_latest_daily_build_url():
+            try:
+                resp = request.urlopen("https://builder.blender.org/download/daily/")
+                soup = BeautifulSoup(resp, 'html.parser')
 
-        # Find all <a> tags with href matching the specific pattern
-        releases = soup.find_all('a', href=re.compile(
-            r"https://cdn\.builder\.blender\.org/download/daily/blender-\d+\.\d+\.\d+-\w+\+\w+\.\w+-linux\.x86_64-release\.tar\.xz"))
+                # Find all <a> tags with href matching the specific pattern
+                releases = soup.find_all('a', href=re.compile(
+                    r"https://cdn\.builder\.blender\.org/download/daily/blender-\d+\.\d+\.\d+-\w+\+\w+\.\w+-linux\.x86_64-release\.tar\.xz"))
 
-        # Filter out URLs containing '.sha256'
-        releases = [release['href']
-                    for release in releases if '.sha256' not in release['href']]
+                # Filter out URLs containing '.sha256'
+                releases = [release['href']
+                            for release in releases if '.sha256' not in release['href']]
 
-        # Return only the latest version (assuming list is sorted in descending order by version)
-        if releases:
-            return releases[0]
-        else:
-            return None
+                # Return only the latest version (assuming list is sorted in descending order by version)
+                if releases:
+                    return releases[0]
+                else:
+                    return None
 
-    except Exception as e:
-        print(f"Error fetching or parsing data: {e}")
-        return None
+            except Exception as e:
+                print(f"Error fetching or parsing data: {e}")
+                return None
 
-download_url = get_latest_daily_build_url()
-if download_url:
-    print(download_url)
-else:
-    print("Failed to find the latest daily Blender build download URL.")
-EOF
-)
-      echo "BLENDER_URL=$blender_url" >> $GITHUB_ENV
-      echo $blender_url > blender_url.txt  # Optionally, save to a file for reference
+        download_url=$(get_latest_daily_build_url)
+        if [[ -z "$download_url" ]]; then
+            echo "Failed to find the latest daily Blender build download URL."
+            exit 1
+        fi
+        echo "BLENDER_URL=$download_url" >> $GITHUB_ENV
+        echo $download_url > blender_url.txt  # Optionally, save to a file for reference
 
+        EOF
+        )
 
     - name: Download and extract Blender
       shell: bash
       run: |
-        wget -O /home/runner/blender.tar.xz ${{ env.BLENDER_URL }}
+        wget -O /home/runner/blender.tar.xz "${{ env.BLENDER_URL }}"
         mkdir -p /home/runner/.local/bin /home/runner/blender
         tar -xf /home/runner/blender.tar.xz -C /home/runner/blender --strip-components=1
         ln -s /home/runner/blender/blender /home/runner/.local/bin/blender
-    
-    - name: remove blender_url.txt
+
+    - name: Remove blender_url.txt
       shell: bash
       run: rm blender_url.txt
 
@@ -91,15 +90,16 @@ EOF
     - name: Build extension and capture zip filename
       shell: bash
       run: |
-        blender --command extension build --output-filepath=${{ env.ZIP_FILE_PATH }}
+        blender --command extension build --output-filepath="${{ env.ZIP_FILE_PATH }}"
 
     - name: Unzip the file
       shell: bash
       run: |
-        unzip ${{ env.ZIP_FILE_PATH }} -d /home/runner/${{ github.event.repository.name }}-${{ env.version }}
+        unzip "${{ env.ZIP_FILE_PATH }}" -d "/home/runner/${{ github.event.repository.name }}-${{ env.version }}"
 
     - name: Archive artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}-${{ env.version }}
         path: /home/runner/${{ github.event.repository.name }}-${{ env.version }}
+
