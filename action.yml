@@ -24,7 +24,7 @@ runs:
 
     - name: Get latest daily Blender build URL
       shell: bash
-      run: python get_latest_blender.py > blender_url.txt
+      run: python ./get_latest_blender.py > blender_url.txt
 
     - name: Download and extract Blender
       shell: bash
