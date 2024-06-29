@@ -22,6 +22,10 @@ runs:
       shell: bash
       run: pip install requests toml-cli toml beautifulsoup4
 
+    - name: List files in directory
+      shell: bash
+      run: ls -R
+
     - name: Get latest daily Blender build URL
       shell: bash
       run: python ./get_latest_blender.py > blender_url.txt
