@@ -52,6 +52,11 @@ runs:
       run: |
         blender --command extension build --output-filepath="${{ env.ZIP_FILE_PATH }}"
 
+    - name: Validate extension
+      shell: bash
+      run: |
+        blender --command extension validate "${{ env.ZIP_FILE_PATH }}"
+
     - name: Unzip the file
       shell: bash
       run: |
