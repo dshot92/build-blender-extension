@@ -83,16 +83,17 @@ runs:
 
     - name: Unzip the file
       shell: bash
-      run: unzip "${{ env.ZIP_FILE_PATH }}" -d "$HOME/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}"
+      run: |
+        unzip "${{ env.ZIP_FILE_PATH }}" -d "/home/runner/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}"
 
     - name: List directory contents
       shell: bash
-      run: ls -al $HOME/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
+      run: ls -al /home/runner/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
 
     - name: Archive artifact
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
-        path: ${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
+        path: /home/runner/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
         if-no-files-found: warn
 
