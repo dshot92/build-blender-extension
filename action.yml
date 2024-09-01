@@ -27,55 +27,67 @@ runs:
           ${{ runner.os }}-pip-
 
     - name: Install required Python packages
+      shell: bash
       run: |
         python -m pip install --upgrade pip
         pip install requests toml-cli toml beautifulsoup4
 
     - name: Create scripts directory
+      shell: bash
       run: mkdir -p $HOME/scripts
 
     - name: Download get_latest_blender.py
+      shell: bash
       run: wget -O $HOME/scripts/get_latest_blender.py https://raw.githubusercontent.com/dshot92/build-blender-extension/main/get_latest_blender.py
 
     - name: Run get_latest_blender.py and capture output
       id: get_blender_url
+      shell: bash
       run: |
         echo "BLENDER_URL=$(python $HOME/scripts/get_latest_blender.py)" >> $GITHUB_ENV
 
     - name: Download Blender
+      shell: bash
       run: wget -O $HOME/blender.tar.xz "${{ env.BLENDER_URL }}"
 
     - name: Create Blender directories
+      shell: bash
       run: |
         mkdir -p $HOME/.local/bin
         mkdir -p $HOME/blender
 
     - name: Extract Blender
+      shell: bash
       run: tar -xf $HOME/blender.tar.xz -C $HOME/blender --strip-components=1
 
     - name: Create Blender symlink
+      shell: bash
       run: |
         ln -s $HOME/blender/blender $HOME/.local/bin/blender
         echo "BLENDER_PATH=$HOME/.local/bin/blender" >> $GITHUB_ENV
 
     - name: Extract version from blender_manifest.toml
       id: extract_version
+      shell: bash
       run: |
         echo "EXT_VERSION=$(python -c "import toml; print(toml.load('./blender_manifest.toml')['version'])")" >> $GITHUB_ENV
         echo "ZIP_FILE_PATH=$HOME/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}.zip" >> $GITHUB_ENV
 
     - name: Build extension
+      shell: bash
       run: ${{ env.BLENDER_PATH }} --command extension build --output-filepath="${{ env.ZIP_FILE_PATH }}"
 
     - name: Validate extension
+      shell: bash
       run: ${{ env.BLENDER_PATH }} --command extension validate "${{ env.ZIP_FILE_PATH }}"
 
     - name: Unzip the file
+      shell: bash
       run: unzip "${{ env.ZIP_FILE_PATH }}" -d "$HOME/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}"
 
     - name: Archive artifact
       uses: actions/upload-artifact@v2
       with:
-        name: ${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
+        name: $HOME/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
         path: $HOME/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
 
