@@ -93,5 +93,6 @@ runs:
       uses: actions/upload-artifact@v2
       with:
         name: ${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
-        path: $HOME/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
+        path: ${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
+        if-no-files-found: warn
 
