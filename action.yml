@@ -91,7 +91,7 @@ runs:
       run: ls -al /home/runner/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
 
     - name: Archive artifact
-      uses: actions/upload-artifact@v2
+      uses: actions/upload-artifact@v4
       with:
         name: ${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
         path: /home/runner/${{ github.event.repository.name }}-${{ env.EXT_VERSION }}
